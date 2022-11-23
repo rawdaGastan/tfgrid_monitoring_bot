@@ -9,10 +9,21 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	client "github.com/threefoldtech/substrate-client"
 )
 
 type Address string
-type Addresses map[string][]Address
+type Network string
+
+var (
+	MainNetwork Network = "mainnet"
+	TestNetwork Network = "testnet"
+)
+
+var SUBSTRATE_URLS = map[Network][]string{
+	TestNetwork: {"wss://tfchain.test.grid.tf/ws"},
+	MainNetwork: {"wss://tfchain.grid.tf/ws"},
+}
 
 type config struct {
 	testMnemonic string
@@ -23,9 +34,15 @@ type config struct {
 	intervalMins int
 }
 
+type Wallets struct {
+	mainnet []Address
+	testnet []Address
+}
+
 type monitor struct {
 	env       config
-	addresses Addresses
+	wallets   Wallets
+	substrate map[Network]client.Manager
 }
 
 // NewMonitor creates a new instance of monitor
@@ -47,13 +64,24 @@ func NewMonitor(envPath string, jsonPath string) (monitor, error) {
 		return mon, err
 	}
 
-	Addresses, err := parseJson(jsonContent)
+	addresses, err := parseJson(jsonContent)
 	if err != nil {
 		return mon, err
 	}
 
-	mon.addresses = Addresses
+	mon.wallets = addresses
 	mon.env = env
+
+	substrate := map[Network]client.Manager{}
+
+	if len(mon.wallets.mainnet) != 0 {
+		substrate[MainNetwork] = client.NewManager(SUBSTRATE_URLS[MainNetwork]...)
+	}
+	if len(mon.wallets.testnet) != 0 {
+		substrate[TestNetwork] = client.NewManager(SUBSTRATE_URLS[TestNetwork]...)
+	}
+
+	mon.substrate = substrate
 
 	return mon, nil
 }
@@ -63,17 +91,19 @@ func (m *monitor) Start() error {
 	ticker := time.NewTicker(time.Duration(m.env.intervalMins) * time.Minute)
 
 	for range ticker.C {
-		for network, addressList := range m.addresses {
+		for network, manager := range m.substrate {
 
-			mnemonic := m.env.mainMnemonic
-			if network == "testnet" {
-				mnemonic = m.env.testMnemonic
+			wallets := []Address{}
+			switch network {
+			case MainNetwork:
+				wallets = m.wallets.mainnet
+			case TestNetwork:
+				wallets = m.wallets.testnet
 			}
-			log.Debug().Msgf("mnemonics is set for %v", network)
 
-			for _, address := range addressList {
+			for _, address := range wallets {
 				log.Debug().Msgf("monitoring for network %v, address %v", network, address)
-				err := m.sendMessage(mnemonic, address)
+				err := m.sendMessage(manager, address)
 				if err != nil {
 					return err
 				}
@@ -90,8 +120,12 @@ func (m *monitor) getTelegramUrl() string {
 
 // sendMessage sends a message with the balance to a telegram bot
 // if it is less than the tft limit
-func (m *monitor) sendMessage(mnemonic string, address Address) error {
-	balance := m.getBalance(mnemonic, address)
+func (m *monitor) sendMessage(manager client.Manager, address Address) error {
+	balance, err := m.getBalance(manager, address)
+	if err != nil {
+		return err
+	}
+
 	if balance >= m.env.tftLimit {
 		return nil
 	}
@@ -99,7 +133,7 @@ func (m *monitor) sendMessage(mnemonic string, address Address) error {
 	url := fmt.Sprintf("%s/sendMessage", m.getTelegramUrl())
 	body, _ := json.Marshal(map[string]string{
 		"chat_id": m.env.chatId,
-		"text":    fmt.Sprintf("account with address %v has balance = %v", address, balance),
+		"text":    fmt.Sprintf("account with address:\n%v\nhas balance = %v", address, balance),
 	})
 	response, err := http.Post(
 		url,
@@ -118,7 +152,24 @@ func (m *monitor) sendMessage(mnemonic string, address Address) error {
 }
 
 // getBalance gets the balance in TFT for the address given
-func (m *monitor) getBalance(mnemonic string, address Address) int {
+func (m *monitor) getBalance(manager client.Manager, address Address) (int, error) {
 	log.Debug().Msgf("get balance for %v", address)
-	return 100
+
+	con, err := manager.Substrate()
+	if err != nil {
+		return 0, err
+	}
+	defer con.Close()
+
+	account, err := client.FromAddress(string(address))
+	if err != nil {
+		return 0, err
+	}
+
+	balance, err := con.GetBalance(account)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(balance.Free.Int64()), nil
 }

@@ -3,6 +3,8 @@ package internal
 import (
 	"os"
 	"testing"
+
+	client "github.com/threefoldtech/substrate-client"
 )
 
 func TestParsers(t *testing.T) {
@@ -269,6 +271,12 @@ func TestMonitor(t *testing.T) {
 		t.Error(err)
 	}
 
+	//managers
+	substrate := map[Network]client.Manager{}
+
+	substrate[MainNetwork] = client.NewManager(SUBSTRATE_URLS[MainNetwork]...)
+	substrate[TestNetwork] = client.NewManager(SUBSTRATE_URLS[TestNetwork]...)
+
 	t.Run("test_invalid_monitor_env", func(t *testing.T) {
 		_, err := NewMonitor("env", jsonFile.Name())
 
@@ -305,7 +313,7 @@ func TestMonitor(t *testing.T) {
 
 		monitor.env.botToken = ""
 		monitor.env.tftLimit = 10000000000000
-		err = monitor.sendMessage("", "")
+		err = monitor.sendMessage(substrate[TestNetwork], "")
 		if err == nil {
 			t.Errorf("sending a message should fail")
 		}
@@ -319,7 +327,7 @@ func TestMonitor(t *testing.T) {
 			t.Errorf("monitor should be successful")
 		}
 
-		err = monitor.sendMessage("", "")
+		err = monitor.sendMessage(substrate[TestNetwork], "")
 		if err != nil {
 			t.Errorf("no message should be sent")
 		}
