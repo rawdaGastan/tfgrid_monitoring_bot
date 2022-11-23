@@ -27,7 +27,7 @@ func TestParsers(t *testing.T) {
 	t.Run("test_wrong_env_no_test_mnemonic", func(t *testing.T) {
 		envContent := `
 			TESTNET_MNEMONIC=
-			MAINNET_MNEMONIC=menmonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=700
 			BOT_TOKEN=TOKEN
 			CHAT_ID=ID
@@ -43,7 +43,7 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_no_main_mnemonic", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
 			MAINNET_MNEMONIC=
 			TFTS_LIMIT=700
 			BOT_TOKEN=TOKEN
@@ -60,8 +60,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_0_limit", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=0
 			BOT_TOKEN=token
 			CHAT_ID=ID
@@ -77,8 +77,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_no_token", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=8
 			BOT_TOKEN=
 			CHAT_ID=ID
@@ -94,8 +94,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_no_id", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=8
 			BOT_TOKEN=token
 			CHAT_ID=
@@ -111,8 +111,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_0_mins", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=8
 			BOT_TOKEN=token
 			CHAT_ID=id
@@ -128,8 +128,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_string_mins", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=8
 			BOT_TOKEN=token
 			CHAT_ID=id
@@ -145,8 +145,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_wrong_env_string_limit", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=limit
 			BOT_TOKEN=token
 			CHAT_ID=id
@@ -162,8 +162,8 @@ func TestParsers(t *testing.T) {
 	t.Run("test_wrong_env_key", func(t *testing.T) {
 		envContent := `
 			key=key
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=10
 			BOT_TOKEN=token
 			CHAT_ID=id
@@ -178,8 +178,8 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test_valid_env", func(t *testing.T) {
 		envContent := `
-			TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+			TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=10
 			BOT_TOKEN=token
 			CHAT_ID=id
@@ -245,8 +245,8 @@ func TestMonitor(t *testing.T) {
 	defer os.Remove(jsonFile.Name())
 
 	data := []byte(`{ 
-		"mainnet": [],
-		"testnet": []   
+		"mainnet": [""],
+		"testnet": [""]   
 	}`)
 	if _, err := jsonFile.Write(data); err != nil {
 		t.Error(err)
@@ -261,8 +261,8 @@ func TestMonitor(t *testing.T) {
 	defer envFile.Close()
 	defer os.Remove(envFile.Name())
 
-	data = []byte(`TESTNET_MNEMONIC=menmonic
-	MAINNET_MNEMONIC=menmonic
+	data = []byte(`TESTNET_MNEMONIC=mnemonic
+	MAINNET_MNEMONIC=mnemonic
 	TFTS_LIMIT=1
 	BOT_TOKEN=token
 	CHAT_ID=id
@@ -328,7 +328,7 @@ func TestMonitor(t *testing.T) {
 		}
 
 		err = monitor.sendMessage(substrate[TestNetwork], "")
-		if err != nil {
+		if err == nil {
 			t.Errorf("no message should be sent")
 		}
 	})
@@ -362,7 +362,7 @@ func TestWrongFilesContent(t *testing.T) {
 		defer envFile.Close()
 		defer os.Remove(envFile.Name())
 
-		data = []byte(`TESTNET_MNEMONIC=menmonic`)
+		data = []byte(`TESTNET_MNEMONIC=mnemonic`)
 		if _, err := envFile.Write(data); err != nil {
 			t.Error(err)
 		}
@@ -385,8 +385,8 @@ func TestWrongFilesContent(t *testing.T) {
 		defer envFile.Close()
 		defer os.Remove(envFile.Name())
 
-		data = []byte(`TESTNET_MNEMONIC=menmonic
-			MAINNET_MNEMONIC=menmonic
+		data = []byte(`TESTNET_MNEMONIC=mnemonic
+			MAINNET_MNEMONIC=mnemonic
 			TFTS_LIMIT=1
 			BOT_TOKEN=token
 			CHAT_ID=id
