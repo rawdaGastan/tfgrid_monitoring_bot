@@ -272,10 +272,10 @@ func TestMonitor(t *testing.T) {
 	}
 
 	//managers
-	substrate := map[Network]client.Manager{}
+	substrate := map[network]client.Manager{}
 
-	substrate[MainNetwork] = client.NewManager(SUBSTRATE_URLS[MainNetwork]...)
-	substrate[TestNetwork] = client.NewManager(SUBSTRATE_URLS[TestNetwork]...)
+	substrate[mainNetwork] = client.NewManager(SUBSTRATE_URLS[mainNetwork]...)
+	substrate[testNetwork] = client.NewManager(SUBSTRATE_URLS[testNetwork]...)
 
 	t.Run("test_invalid_monitor_env", func(t *testing.T) {
 		_, err := NewMonitor("env", jsonFile.Name())
@@ -313,7 +313,7 @@ func TestMonitor(t *testing.T) {
 
 		monitor.env.botToken = ""
 		monitor.env.tftLimit = 10000000000000
-		err = monitor.sendMessage(substrate[TestNetwork], "")
+		err = monitor.sendMessage(substrate[testNetwork], "")
 		if err == nil {
 			t.Errorf("sending a message should fail")
 		}
@@ -327,7 +327,7 @@ func TestMonitor(t *testing.T) {
 			t.Errorf("monitor should be successful")
 		}
 
-		err = monitor.sendMessage(substrate[TestNetwork], "")
+		err = monitor.sendMessage(substrate[testNetwork], "")
 		if err == nil {
 			t.Errorf("no message should be sent")
 		}

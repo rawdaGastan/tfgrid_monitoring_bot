@@ -12,17 +12,17 @@ import (
 	client "github.com/threefoldtech/substrate-client"
 )
 
-type Address string
-type Network string
+type address string
+type network string
 
 var (
-	MainNetwork Network = "mainnet"
-	TestNetwork Network = "testnet"
+	mainNetwork network = "mainnet"
+	testNetwork network = "testnet"
 )
 
-var SUBSTRATE_URLS = map[Network][]string{
-	TestNetwork: {"wss://tfchain.test.grid.tf/ws"},
-	MainNetwork: {"wss://tfchain.grid.tf/ws"},
+var SUBSTRATE_URLS = map[network][]string{
+	testNetwork: {"wss://tfchain.test.grid.tf/ws"},
+	mainNetwork: {"wss://tfchain.grid.tf/ws"},
 }
 
 type config struct {
@@ -34,15 +34,15 @@ type config struct {
 	intervalMins int
 }
 
-type Wallets struct {
-	mainnet []Address
-	testnet []Address
+type wallets struct {
+	mainnet []address
+	testnet []address
 }
 
 type monitor struct {
 	env       config
-	wallets   Wallets
-	substrate map[Network]client.Manager
+	wallets   wallets
+	substrate map[network]client.Manager
 }
 
 // NewMonitor creates a new instance of monitor
@@ -72,13 +72,13 @@ func NewMonitor(envPath string, jsonPath string) (monitor, error) {
 	mon.wallets = addresses
 	mon.env = env
 
-	substrate := map[Network]client.Manager{}
+	substrate := map[network]client.Manager{}
 
 	if len(mon.wallets.mainnet) != 0 {
-		substrate[MainNetwork] = client.NewManager(SUBSTRATE_URLS[MainNetwork]...)
+		substrate[mainNetwork] = client.NewManager(SUBSTRATE_URLS[mainNetwork]...)
 	}
 	if len(mon.wallets.testnet) != 0 {
-		substrate[TestNetwork] = client.NewManager(SUBSTRATE_URLS[TestNetwork]...)
+		substrate[testNetwork] = client.NewManager(SUBSTRATE_URLS[testNetwork]...)
 	}
 
 	mon.substrate = substrate
@@ -93,11 +93,11 @@ func (m *monitor) Start() error {
 	for range ticker.C {
 		for network, manager := range m.substrate {
 
-			wallets := []Address{}
+			wallets := []address{}
 			switch network {
-			case MainNetwork:
+			case mainNetwork:
 				wallets = m.wallets.mainnet
-			case TestNetwork:
+			case testNetwork:
 				wallets = m.wallets.testnet
 			}
 
@@ -120,7 +120,7 @@ func (m *monitor) getTelegramUrl() string {
 
 // sendMessage sends a message with the balance to a telegram bot
 // if it is less than the tft limit
-func (m *monitor) sendMessage(manager client.Manager, address Address) error {
+func (m *monitor) sendMessage(manager client.Manager, address address) error {
 	balance, err := m.getBalance(manager, address)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (m *monitor) sendMessage(manager client.Manager, address Address) error {
 }
 
 // getBalance gets the balance in TFT for the address given
-func (m *monitor) getBalance(manager client.Manager, address Address) (int, error) {
+func (m *monitor) getBalance(manager client.Manager, address address) (int, error) {
 	log.Debug().Msgf("get balance for %v", address)
 
 	con, err := manager.Substrate()

@@ -18,28 +18,28 @@ func readFile(path string) ([]byte, error) {
 	return content, nil
 }
 
-func parseJson(content []byte) (wallets Wallets, err error) {
-	addresses := map[string][]Address{}
+func parseJson(content []byte) (w wallets, err error) {
+	addresses := map[string][]address{}
 	err = json.Unmarshal(content, &addresses)
 
 	if err != nil {
 		return
 	}
 
-	wallets = Wallets{}
+	w = wallets{}
 	if _, ok := addresses["mainnet"]; !ok {
-		return wallets, errors.New("mainnet addresses is missing")
+		return w, errors.New("mainnet addresses is missing")
 	} else {
-		wallets.testnet = addresses["mainnet"]
+		w.testnet = addresses["mainnet"]
 	}
 
 	if _, ok := addresses["testnet"]; !ok {
-		return wallets, errors.New("testnet addresses is missing")
+		return w, errors.New("testnet addresses is missing")
 	} else {
-		wallets.mainnet = addresses["testnet"]
+		w.mainnet = addresses["testnet"]
 	}
 
-	return wallets, err
+	return w, err
 }
 
 func parseEnv(content string) (config, error) {
