@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -234,7 +233,7 @@ func TestParsers(t *testing.T) {
 
 func TestMonitor(t *testing.T) {
 	//json
-	jsonFile, err := ioutil.TempFile("", "*.json")
+	jsonFile, err := os.CreateTemp("", "*.json")
 
 	if err != nil {
 		t.Errorf("failed with error, %v", err)
@@ -252,7 +251,7 @@ func TestMonitor(t *testing.T) {
 	}
 
 	//env
-	envFile, err := ioutil.TempFile("", "*.env")
+	envFile, err := os.CreateTemp("", "*.env")
 	if err != nil {
 		t.Errorf("failed with error, %v", err)
 	}
@@ -320,31 +319,16 @@ func TestMonitor(t *testing.T) {
 			t.Errorf("monitor should be successful")
 		}
 
-		monitor.sendMessage("", "")
+		err = monitor.sendMessage("", "")
 		if err != nil {
 			t.Errorf("no message should be sent")
-		}
-	})
-
-	t.Run("test_send_message_high_limit", func(t *testing.T) {
-
-		monitor, err := NewMonitor(envFile.Name(), jsonFile.Name())
-
-		if err != nil {
-			t.Errorf("monitor should be successful")
-		}
-
-		monitor.env.tftLimit = 10000000000000
-		monitor.sendMessage("", "")
-		if err != nil {
-			t.Errorf("message should be sent")
 		}
 	})
 }
 
 func TestWrongFilesContent(t *testing.T) {
 	//json
-	jsonFile, err := ioutil.TempFile("", "*.json")
+	jsonFile, err := os.CreateTemp("", "*.json")
 
 	if err != nil {
 		t.Errorf("failed with error, %v", err)
@@ -362,7 +346,7 @@ func TestWrongFilesContent(t *testing.T) {
 
 	t.Run("test_invalid_monitor_wrong_env", func(t *testing.T) {
 		//env
-		envFile, err := ioutil.TempFile("", "*.env")
+		envFile, err := os.CreateTemp("", "*.env")
 		if err != nil {
 			t.Errorf("failed with error, %v", err)
 		}
@@ -385,7 +369,7 @@ func TestWrongFilesContent(t *testing.T) {
 	t.Run("test_invalid_monitor_wrong_json", func(t *testing.T) {
 
 		//env
-		envFile, err := ioutil.TempFile("", "*.env")
+		envFile, err := os.CreateTemp("", "*.env")
 		if err != nil {
 			t.Errorf("failed with error, %v", err)
 		}
