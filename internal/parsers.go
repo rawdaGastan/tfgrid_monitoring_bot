@@ -30,13 +30,13 @@ func parseJson(content []byte) (w wallets, err error) {
 	if _, ok := addresses["mainnet"]; !ok {
 		return w, errors.New("mainnet addresses is missing")
 	} else {
-		w.testnet = addresses["mainnet"]
+		w.mainnet = addresses["mainnet"]
 	}
 
 	if _, ok := addresses["testnet"]; !ok {
 		return w, errors.New("testnet addresses is missing")
 	} else {
-		w.mainnet = addresses["testnet"]
+		w.testnet = addresses["testnet"]
 	}
 
 	return w, err

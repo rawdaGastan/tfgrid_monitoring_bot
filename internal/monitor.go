@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -87,7 +88,7 @@ func NewMonitor(envPath string, jsonPath string) (monitor, error) {
 }
 
 // Start starting the monitoring service
-func (m *monitor) Start() error {
+func (m *monitor) Start() {
 	ticker := time.NewTicker(time.Duration(m.env.intervalMins) * time.Minute)
 
 	for range ticker.C {
@@ -105,12 +106,11 @@ func (m *monitor) Start() error {
 				log.Debug().Msgf("monitoring for network %v, address %v", network, address)
 				err := m.sendMessage(manager, address)
 				if err != nil {
-					return err
+					log.Error().Err(err).Msg("monitoring failed with error")
 				}
 			}
 		}
 	}
-	return nil
 }
 
 // getTelegramUrl returns the telegram bot api url
@@ -126,7 +126,7 @@ func (m *monitor) sendMessage(manager client.Manager, address address) error {
 		return err
 	}
 
-	if balance >= m.env.tftLimit {
+	if balance >= float64(m.env.tftLimit) {
 		return nil
 	}
 
@@ -152,7 +152,7 @@ func (m *monitor) sendMessage(manager client.Manager, address address) error {
 }
 
 // getBalance gets the balance in TFT for the address given
-func (m *monitor) getBalance(manager client.Manager, address address) (int, error) {
+func (m *monitor) getBalance(manager client.Manager, address address) (float64, error) {
 	log.Debug().Msgf("get balance for %v", address)
 
 	con, err := manager.Substrate()
@@ -171,5 +171,5 @@ func (m *monitor) getBalance(manager client.Manager, address address) (int, erro
 		return 0, err
 	}
 
-	return int(balance.Free.Int64()), nil
+	return float64(balance.Free.Int64()) / (4.2949673 * math.Pow(10, 16)), nil
 }

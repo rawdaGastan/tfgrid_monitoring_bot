@@ -62,11 +62,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		err = monitor.Start()
-		if err != nil {
-			log.Error().Err(err).Msg("failed monitoring")
-			return
-		}
+		monitor.Start()
 	},
 }
 
