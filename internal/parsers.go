@@ -18,7 +18,7 @@ func readFile(path string) ([]byte, error) {
 	return content, nil
 }
 
-func parseJson(content []byte) (w wallets, err error) {
+func parseJsonIntoWallets(content []byte) (w wallets, err error) {
 	addresses := map[string][]address{}
 	err = json.Unmarshal(content, &addresses)
 
