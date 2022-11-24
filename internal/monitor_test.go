@@ -199,7 +199,7 @@ func TestParsers(t *testing.T) {
 			"testnet": []   
 		}
 		`
-		_, err := parseJson([]byte(content))
+		_, err := parseJsonIntoWallets([]byte(content))
 
 		if err != nil {
 			t.Errorf("parsing should be successful")
@@ -212,7 +212,7 @@ func TestParsers(t *testing.T) {
 			"mainnet": []
 		}
 		`
-		_, err := parseJson([]byte(content))
+		_, err := parseJsonIntoWallets([]byte(content))
 
 		if err == nil {
 			t.Errorf("parsing should fail, missing testnet")
@@ -225,7 +225,7 @@ func TestParsers(t *testing.T) {
 			"testnet": []
 		}
 		`
-		_, err := parseJson([]byte(content))
+		_, err := parseJsonIntoWallets([]byte(content))
 
 		if err == nil {
 			t.Errorf("parsing should fail, missing mainnet")

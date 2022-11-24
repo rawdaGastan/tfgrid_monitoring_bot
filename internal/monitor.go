@@ -65,7 +65,7 @@ func NewMonitor(envPath string, jsonPath string) (monitor, error) {
 		return mon, err
 	}
 
-	addresses, err := parseJson(jsonContent)
+	addresses, err := parseJsonIntoWallets(jsonContent)
 	if err != nil {
 		return mon, err
 	}
