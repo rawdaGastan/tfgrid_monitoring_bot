@@ -171,5 +171,5 @@ func (m *monitor) getBalance(manager client.Manager, address address) (float64, 
 		return 0, err
 	}
 
-	return float64(balance.Free.Int64()) / (4.2949673 * math.Pow(10, 16)), nil
+	return float64(balance.Free.Int64()) / math.Pow(10, 7), nil
 }
